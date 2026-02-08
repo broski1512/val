@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Will You Be My Valentine?</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:#e6c3cb;
+}
+
+/* CARD */
+
+.card{
+width:650px;
+max-width:92%;
+background:#efefef;
+border-radius:40px;
+padding:80px 60px;
+text-align:center;
+}
+
+/* EMOJI */
+
+.emoji{
+font-size:90px;
+margin-bottom:30px;
+}
+
+h1{
+font-size:42px;
+font-weight:700;
+margin-bottom:70px;
+line-height:1.2;
+}
+
+/* BUTTON AREA */
+
+.buttons{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:100px;
+position:relative;
+height:140px;
+}
+
+/* BUTTON BASE */
+
+button{
+padding:22px 65px;
+font-size:24px;
+border-radius:60px;
+cursor:pointer;
+transition:.25s;
+}
+
+/* YES BUTTON */
+
+#yes{
+background:#e94b78;
+color:white;
+border:none;
+box-shadow:0 10px 25px rgba(0,0,0,.15);
+}
+
+#yes:hover{
+transform:scale(1.12);
+}
+
+/* NO BUTTON */
+
+#no{
+background:#e3e3e3;
+border:2px solid #cfcfcf;
+position:absolute;
+}
+
+/* TEXT */
+
+.note{
+margin-top:35px;
+font-size:18px;
+color:#777;
+}
+
+.shareBox{
+margin-top:35px;
+}
+
+input{
+width:100%;
+padding:16px;
+border-radius:14px;
+border:2px solid #d6d6d6;
+font-size:16px;
+background:white;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<div class="emoji">🐱 💗</div>
+
+<h1 id="title"></h1>
+
+<div class="buttons">
+<button id="yes">Yes</button>
+<button id="no">No</button>
+</div>
+
+<div class="note">“No” seems a bit shy 😉</div>
+
+<div class="shareBox">
+<p style="margin-bottom:10px;font-size:18px;">Share this link:</p>
+<input id="shareLink" readonly>
+</div>
+
+</div>
+
+<script>
+
+/* PERSONALIZED NAME */
+
+const params = new URLSearchParams(window.location.search);
+let name = params.get('name') || "Angela";
+
+name = name.charAt(0).toUpperCase() + name.slice(1);
+
+document.getElementById("title").innerText =
+`${name}, will you be my valentine?`;
+
+document.getElementById("shareLink").value =
+`${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}`;
+
+
+/* =====================================
+CONTROLLED ESCAPE BUTTON
+Moves in a box pattern:
+LEFT → UP → RIGHT → DOWN
+===================================== */
+
+const noBtn = document.getElementById("no");
+const card = document.querySelector(".card");
+
+let direction = 0; // 0 left, 1 up, 2 right, 3 down
+
+function moveButton(){
+
+const step = 110;
+
+const btnRect = noBtn.getBoundingClientRect();
+const cardRect = card.getBoundingClientRect();
+
+let left = btnRect.left - cardRect.left;
+let top  = btnRect.top  - cardRect.top;
+
+/* LEFT */
+
+if(direction === 0){
+left -= step;
+
+if(left <= 30){
+left = 30;
+direction = 1;
+}
+}
+
+/* UP */
+
+else if(direction === 1){
+top -= step/1.5;
+
+if(top <= 160){
+top = 160;
+direction = 2;
+}
+}
+
+/* RIGHT */
+
+else if(direction === 2){
+left += step;
+
+if(left >= cardRect.width - btnRect.width - 30){
+left = cardRect.width - btnRect.width - 30;
+direction = 3;
+}
+}
+
+/* DOWN */
+
+else{
+top += step/1.5;
+
+if(top >= 260){
+top = 260;
+direction = 0;
+}
+}
+
+noBtn.style.left = left + "px";
+noBtn.style.top  = top + "px";
+}
+
+/* Cursor proximity detection */
+
+document.addEventListener("mousemove",(e)=>{
+
+const rect = noBtn.getBoundingClientRect();
+
+const centerX = rect.left + rect.width/2;
+const centerY = rect.top + rect.height/2;
+
+const distance = Math.hypot(e.clientX-centerX,e.clientY-centerY);
+
+if(distance < 50){
+moveButton();
+}
+
+});
+
+/* Mobile */
+
+noBtn.addEventListener("touchstart",(e)=>{
+e.preventDefault();
+moveButton();
+});
+
+
+/* YES CLICK */
+
+document.getElementById("yes").onclick = ()=>{
+
+confetti({
+particleCount:250,
+spread:150,
+origin:{y:.6}
+});
+
+document.querySelector(".card").innerHTML = `
+<div style="font-size:90px">❤️</div>
+<h1>Yay!! ${name} said YES!</h1>
+`;
+
+};
+
+</script>
+
+</body>
+</html>
